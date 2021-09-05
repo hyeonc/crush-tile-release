@@ -2939,7 +2939,7 @@ Type.enumParameters = function(e) {
 	}
 };
 var Websocket = function() {
-	this.ws = haxe_net_WebSocket.create("ws://13.124.120.184:8000/echo");
+	this.ws = haxe_net_WebSocket.create("wss://13.124.120.184:8000/echo");
 	this.ws.onopen = $bind(this,this.onOpen);
 	this.ws.onmessageBytes = $bind(this,this.onMessage);
 };
