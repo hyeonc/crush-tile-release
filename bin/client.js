@@ -2747,6 +2747,7 @@ Packet.prototype = {
 		var dy = packetStream.getFloat();
 		var bdx = packetStream.getFloat();
 		var bdy = packetStream.getFloat();
+		var speed = packetStream.getFloat();
 		var altitude = packetStream.getFloat();
 		var dalt = packetStream.getFloat();
 		var proxy = entity_Proxy.FindProxy(id);
@@ -2776,6 +2777,7 @@ Packet.prototype = {
 		proxy.dy = dy;
 		proxy.bdx = bdx;
 		proxy.bdy = bdy;
+		proxy.speed = speed;
 		proxy.altitude = altitude;
 		proxy.dalt = dalt;
 		return proxy;
@@ -2822,7 +2824,7 @@ Packet.prototype = {
 			proxy.destroyed = true;
 			Entity.GC.push(proxy);
 		}
-		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 143, className : "Packet", methodName : "OnDestroyedEntity"});
+		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 145, className : "Packet", methodName : "OnDestroyedEntity"});
 	}
 	,OnReadyHammering: function(packetStream) {
 		var dirX = packetStream.getInt32();
@@ -7993,6 +7995,78 @@ var entity_Tile = function(x,y,id) {
 	_this._animManager.registerStateAnim("ballFlat",1,null,function() {
 		return _gthis.cd.fastCheck.h.hasOwnProperty(0);
 	});
+	var saturation = 0.5;
+	var luminosity = 0.5;
+	if(luminosity == null) {
+		luminosity = 1.0;
+	}
+	if(saturation == null) {
+		saturation = 1.0;
+	}
+	var h = 0.5;
+	var col;
+	if(luminosity <= 0) {
+		col = 0;
+	} else if(saturation <= 0) {
+		col = ((luminosity < 0 ? 0 : luminosity > 1 ? 1 : luminosity) * 255 | 0) << 16 | ((luminosity < 0 ? 0 : luminosity > 1 ? 1 : luminosity) * 255 | 0) << 8 | ((luminosity < 0 ? 0 : luminosity > 1 ? 1 : luminosity) * 255 | 0);
+	} else {
+		var r = 0.;
+		var g = 0.;
+		var b = 0.;
+		h *= 6;
+		var i;
+		if(h >= 0) {
+			i = h | 0;
+		} else {
+			var i1 = h | 0;
+			i = h == i1 ? i1 : i1 - 1;
+		}
+		var c1 = luminosity * (1 - saturation);
+		var c2 = luminosity * (1 - saturation * (h - i));
+		var c3 = luminosity * (1 - saturation * (1 - (h - i)));
+		if(i == 0 || i == 6) {
+			r = luminosity;
+			g = c3;
+			b = c1;
+		} else if(i == 1) {
+			r = c2;
+			g = luminosity;
+			b = c1;
+		} else if(i == 2) {
+			r = c1;
+			g = luminosity;
+			b = c3;
+		} else if(i == 3) {
+			r = c1;
+			g = c2;
+			b = luminosity;
+		} else if(i == 4) {
+			r = c3;
+			g = c1;
+			b = luminosity;
+		} else {
+			r = luminosity;
+			g = c1;
+			b = c2;
+		}
+		col = ((r < 0 ? 0 : r > 1 ? 1 : r) * 255 | 0) << 16 | ((g < 0 ? 0 : g > 1 ? 1 : g) * 255 | 0) << 8 | ((b < 0 ? 0 : b > 1 ? 1 : b) * 255 | 0);
+	}
+	var ratioNewColor = 1;
+	var ratioOldColor = null;
+	if(ratioNewColor == null) {
+		ratioNewColor = 1.0;
+	}
+	if(ratioOldColor == null) {
+		ratioOldColor = 1 - ratioNewColor;
+	}
+	var rgb_r = col >> 16 & 255;
+	var rgb_g = col >> 8 & 255;
+	var rgb_b = col & 255;
+	var r = ratioNewColor * rgb_r / 255;
+	var g = ratioNewColor * rgb_g / 255;
+	var b = ratioNewColor * rgb_b / 255;
+	var m = [ratioOldColor + r,g,b,0,r,ratioOldColor + g,b,0,r,g,ratioOldColor + b,0,0,0,0,1];
+	this.spr.set_colorMatrix(h3d_Matrix.L(m));
 	this.hasColl = false;
 	Game.ME.scroller.addChildAt(this.spr,Const.DP_TILE);
 };
