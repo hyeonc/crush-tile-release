@@ -2176,6 +2176,9 @@ $hxClasses["Input"] = Input;
 Input.__name__ = "Input";
 Input.prototype = {
 	updateMovement: function() {
+		if(this.hero.cd.fastCheck.h.hasOwnProperty(29360128) == true) {
+			return;
+		}
 		var sx = 0;
 		var sy = 0;
 		var _this = this.controller;
@@ -2419,6 +2422,9 @@ Input.prototype = {
 		}
 	}
 	,updateAction: function() {
+		if(this.hero.cd.fastCheck.h.hasOwnProperty(29360128) == true) {
+			return;
+		}
 		var _this = this.hero;
 		if(_this.altitude == 0 && _this.dalt == 0) {
 			var tmp;
@@ -2730,6 +2736,10 @@ var Packet = function() {
 	this.PacketHandler.h[5006] = v;
 	var v = $bind(this,this.OnRecoverTile);
 	this.PacketHandler.h[5007] = v;
+	var v = $bind(this,this.OnFallingHero);
+	this.PacketHandler.h[5008] = v;
+	var v = $bind(this,this.OnReviveHero);
+	this.PacketHandler.h[5009] = v;
 };
 $hxClasses["Packet"] = Packet;
 Packet.__name__ = "Packet";
@@ -2786,6 +2796,7 @@ Packet.prototype = {
 		var packetStream = new PacketStream(message);
 		var packetType = packetStream.getUInt16();
 		if(this.PacketHandler.h.hasOwnProperty(packetType) == true) {
+			haxe_Log.trace("OnRespHandler : " + packetType,{ fileName : "src/Packet.hx", lineNumber : 113, className : "Packet", methodName : "OnRespHandler"});
 			var handler = this.PacketHandler.h[packetType];
 			handler(packetStream);
 		}
@@ -2824,7 +2835,7 @@ Packet.prototype = {
 			proxy.destroyed = true;
 			Entity.GC.push(proxy);
 		}
-		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 145, className : "Packet", methodName : "OnDestroyedEntity"});
+		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 150, className : "Packet", methodName : "OnDestroyedEntity"});
 	}
 	,OnReadyHammering: function(packetStream) {
 		var dirX = packetStream.getInt32();
@@ -2866,6 +2877,20 @@ Packet.prototype = {
 		if(tile != null) {
 			tile.recover();
 		}
+	}
+	,OnFallingHero: function(packetStream) {
+		var id = packetStream.getInt32();
+		var hero = js_Boot.__cast(entity_Proxy.FindProxy(id) , entity_Hero);
+		hero.fall();
+	}
+	,OnReviveHero: function(packetStream) {
+		var id = packetStream.getInt32();
+		var cx = packetStream.getInt32();
+		var cy = packetStream.getInt32();
+		var hero = js_Boot.__cast(entity_Proxy.FindProxy(id) , entity_Hero);
+		hero.revive();
+		hero.cx = cx;
+		hero.cy = cy;
 	}
 	,__class__: Packet
 };
@@ -7937,6 +7962,64 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 				}
 			}
 		}
+	}
+	,fall: function() {
+		this.entityVisible = false;
+		var _this = this.cd;
+		var frames = 999999 * this.cd.baseFps;
+		var allowLower = true;
+		var onComplete = null;
+		if(allowLower == null) {
+			allowLower = true;
+		}
+		frames = Math.floor(frames * 1000) / 1000;
+		var cur = _this._getCdObject(29360128);
+		if(!(cur != null && frames < cur.frames && !allowLower)) {
+			if(frames <= 0) {
+				if(cur != null) {
+					HxOverrides.remove(_this.cdList,cur);
+					cur.frames = 0;
+					cur.cb = null;
+					_this.fastCheck.remove(cur.k);
+				}
+			} else {
+				_this.fastCheck.h[29360128] = true;
+				if(cur != null) {
+					cur.frames = frames;
+					cur.initial = frames;
+				} else {
+					_this.cdList.push(new dn__$Cooldown_CdInst(29360128,frames));
+				}
+			}
+			if(onComplete != null) {
+				if(frames <= 0) {
+					onComplete();
+				} else {
+					var cd = _this._getCdObject(29360128);
+					if(cd == null) {
+						throw haxe_Exception.thrown("cannot bind onComplete(" + 29360128 + "): cooldown " + 29360128 + " isn't running");
+					}
+					cd.cb = onComplete;
+				}
+			}
+		}
+	}
+	,revive: function() {
+		var _this = this.cd;
+		var _g = 0;
+		var _g1 = _this.cdList;
+		while(_g < _g1.length) {
+			var cd = _g1[_g];
+			++_g;
+			if(cd.k == 29360128) {
+				HxOverrides.remove(_this.cdList,cd);
+				cd.frames = 0;
+				cd.cb = null;
+				_this.fastCheck.remove(cd.k);
+				break;
+			}
+		}
+		this.entityVisible = true;
 	}
 	,readyHammering: function(sx,sy) {
 		var _g = 1;
@@ -51792,7 +51875,7 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
-dn_Cooldown.__meta__ = { obj : { indexes : ["flat","shaking","recentHit","rolling","walking","talking","dashing","fall","hammering","readyHammering","zsort","emitterLife","emitterTick","test","jump"]}};
+dn_Cooldown.__meta__ = { obj : { indexes : ["flat","shaking","recentHit","rolling","walking","talking","dashing","falling","hammering","readyHammering","zsort","emitterLife","emitterTick","test","jump"]}};
 dn_data_GetText.VERBOSE = false;
 dn_data_GetText.CONTEXT_DISAMB_SEP = "||@";
 dn_data_GetText.COMMENT_REG = new EReg("(\\|\\|\\?(.*?))($|\\|\\|)","i");
