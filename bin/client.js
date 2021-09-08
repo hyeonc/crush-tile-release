@@ -2796,7 +2796,6 @@ Packet.prototype = {
 		var packetStream = new PacketStream(message);
 		var packetType = packetStream.getUInt16();
 		if(this.PacketHandler.h.hasOwnProperty(packetType) == true) {
-			haxe_Log.trace("OnRespHandler : " + packetType,{ fileName : "src/Packet.hx", lineNumber : 113, className : "Packet", methodName : "OnRespHandler"});
 			var handler = this.PacketHandler.h[packetType];
 			handler(packetStream);
 		}
@@ -2835,7 +2834,7 @@ Packet.prototype = {
 			proxy.destroyed = true;
 			Entity.GC.push(proxy);
 		}
-		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 150, className : "Packet", methodName : "OnDestroyedEntity"});
+		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 149, className : "Packet", methodName : "OnDestroyedEntity"});
 	}
 	,OnReadyHammering: function(packetStream) {
 		var dirX = packetStream.getInt32();
@@ -3212,7 +3211,7 @@ Type.enumParameters = function(e) {
 	}
 };
 var Websocket = function() {
-	this.ws = haxe_net_WebSocket.create("ws://127.0.0.1:8000/echo");
+	this.ws = haxe_net_WebSocket.create("ws://13.124.120.184:8000/echo");
 	this.ws.onopen = $bind(this,this.onOpen);
 	this.ws.onmessageBytes = $bind(this,this.onMessage);
 };
