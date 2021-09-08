@@ -1171,36 +1171,36 @@ Camera.prototype = $extend(dn_Process.prototype,{
 	,apply: function() {
 		var level = Game.ME.level;
 		var scroller = Game.ME.scroller;
-		if(!this.clampToLevelBounds || this.get_pxWid() < 320) {
+		if(!this.clampToLevelBounds || this.get_pxWid() < level.cWid * 16) {
 			var _this = this.focus;
 			var v = -((_this.cx + _this.xr) * 16) + this.get_pxWid() * 0.5;
 			scroller.posChanged = true;
 			scroller.x = v;
 		} else {
-			var v = this.get_pxWid() * 0.5 - 160.;
+			var v = this.get_pxWid() * 0.5;
 			scroller.posChanged = true;
-			scroller.x = v;
+			scroller.x = v - level.cWid * 16 * 0.5;
 		}
-		if(!this.clampToLevelBounds || this.get_pxHei() < 160) {
+		if(!this.clampToLevelBounds || this.get_pxHei() < level.cHei * 16) {
 			var _this = this.focus;
 			var v = -((_this.cy + _this.yr) * 16) + this.get_pxHei() * 0.5;
 			scroller.posChanged = true;
 			scroller.y = v;
 		} else {
-			var v = this.get_pxHei() * 0.5 - 80.;
+			var v = this.get_pxHei() * 0.5;
 			scroller.posChanged = true;
-			scroller.y = v;
+			scroller.y = v - level.cHei * 16 * 0.5;
 		}
 		if(this.clampToLevelBounds) {
-			if(this.get_pxWid() < 320) {
+			if(this.get_pxWid() < level.cWid * 16) {
 				var x = scroller.x;
-				var min = this.get_pxWid() - 320;
+				var min = this.get_pxWid() - level.cWid * 16;
 				scroller.posChanged = true;
 				scroller.x = x < min ? min : x > 0 ? 0 : x;
 			}
-			if(this.get_pxHei() < 160) {
+			if(this.get_pxHei() < level.cHei * 16) {
 				var x = scroller.y;
-				var min = this.get_pxHei() - 160;
+				var min = this.get_pxHei() - level.cHei * 16;
 				scroller.posChanged = true;
 				scroller.y = x < min ? min : x > 0 ? 0 : x;
 			}
@@ -1567,43 +1567,6 @@ Entity.prototype = {
 			}
 		}
 	}
-	,chargeAction: function(id,sec,cb) {
-		if(this.isChargingAction(id)) {
-			this.cancelAction(id);
-		}
-		if(sec <= 0) {
-			cb();
-		} else {
-			this.actions.push({ id : id, cb : cb, t : sec});
-		}
-	}
-	,isChargingAction: function(id) {
-		if(id == null) {
-			return this.actions.length > 0;
-		}
-		var _g = 0;
-		var _g1 = this.actions;
-		while(_g < _g1.length) {
-			var a = _g1[_g];
-			++_g;
-			if(a.id == id) {
-				return true;
-			}
-		}
-		return false;
-	}
-	,cancelAction: function(id) {
-		if(id == null) {
-			this.actions = [];
-		} else {
-			var i = 0;
-			while(i < this.actions.length) if(this.actions[i].id == id) {
-				this.actions.splice(i,1);
-			} else {
-				++i;
-			}
-		}
-	}
 	,updateActions: function() {
 		var i = 0;
 		while(i < this.actions.length) {
@@ -1685,55 +1648,59 @@ Entity.prototype = {
 			if(this.hasColl) {
 				var tmp;
 				if(this.xr > 0.7) {
+					var _this = Game.ME.level;
 					var cx = this.cx + 1;
 					var cy = this.cy;
-					tmp = cx >= 0 && cx < 20 && cy >= 0 && cy < 10 ? Game.ME.level.tileMap.h[cx + cy * 20].isCollider == true : true;
+					tmp = cx >= 0 && cx < _this.cWid && cy >= 0 && cy < _this.cHei ? _this.tileMap.h[cx + cy * _this.cWid].isCollider == true : true;
 				} else {
 					tmp = false;
 				}
 				if(tmp) {
 					this.xr = 0.7;
-					var _this = Game.ME;
-					this.dx -= 0.05 * (_this.utmod * _this.getComputedTimeMultiplier());
+					var _this1 = Game.ME;
+					this.dx -= 0.05 * (_this1.utmod * _this1.getComputedTimeMultiplier());
 					this.onTouchWallX();
 				}
 				var tmp1;
 				if(this.xr >= 0.6) {
+					var _this2 = Game.ME.level;
 					var cx1 = this.cx + 1;
 					var cy1 = this.cy;
-					tmp1 = cx1 >= 0 && cx1 < 20 && cy1 >= 0 && cy1 < 10 ? Game.ME.level.tileMap.h[cx1 + cy1 * 20].isCollider == true : true;
+					tmp1 = cx1 >= 0 && cx1 < _this2.cWid && cy1 >= 0 && cy1 < _this2.cHei ? _this2.tileMap.h[cx1 + cy1 * _this2.cWid].isCollider == true : true;
 				} else {
 					tmp1 = false;
 				}
 				if(tmp1) {
-					var _this1 = Game.ME;
-					this.dx -= 0.03 * (_this1.utmod * _this1.getComputedTimeMultiplier());
+					var _this3 = Game.ME;
+					this.dx -= 0.03 * (_this3.utmod * _this3.getComputedTimeMultiplier());
 				}
 				var tmp2;
 				if(this.xr < 0.3) {
+					var _this4 = Game.ME.level;
 					var cx2 = this.cx - 1;
 					var cy2 = this.cy;
-					tmp2 = cx2 >= 0 && cx2 < 20 && cy2 >= 0 && cy2 < 10 ? Game.ME.level.tileMap.h[cx2 + cy2 * 20].isCollider == true : true;
+					tmp2 = cx2 >= 0 && cx2 < _this4.cWid && cy2 >= 0 && cy2 < _this4.cHei ? _this4.tileMap.h[cx2 + cy2 * _this4.cWid].isCollider == true : true;
 				} else {
 					tmp2 = false;
 				}
 				if(tmp2) {
 					this.xr = 0.3;
-					var _this2 = Game.ME;
-					this.dx += 0.05 * (_this2.utmod * _this2.getComputedTimeMultiplier());
+					var _this5 = Game.ME;
+					this.dx += 0.05 * (_this5.utmod * _this5.getComputedTimeMultiplier());
 					this.onTouchWallX();
 				}
 				var tmp3;
 				if(this.xr < 0.4) {
+					var _this6 = Game.ME.level;
 					var cx3 = this.cx - 1;
 					var cy3 = this.cy;
-					tmp3 = cx3 >= 0 && cx3 < 20 && cy3 >= 0 && cy3 < 10 ? Game.ME.level.tileMap.h[cx3 + cy3 * 20].isCollider == true : true;
+					tmp3 = cx3 >= 0 && cx3 < _this6.cWid && cy3 >= 0 && cy3 < _this6.cHei ? _this6.tileMap.h[cx3 + cy3 * _this6.cWid].isCollider == true : true;
 				} else {
 					tmp3 = false;
 				}
 				if(tmp3) {
-					var _this3 = Game.ME;
-					this.dx += 0.03 * (_this3.utmod * _this3.getComputedTimeMultiplier());
+					var _this7 = Game.ME;
+					this.dx += 0.03 * (_this7.utmod * _this7.getComputedTimeMultiplier());
 				}
 			}
 			while(this.xr > 1) {
@@ -1780,9 +1747,10 @@ Entity.prototype = {
 			if(this.hasColl) {
 				var tmp;
 				if(this.yr > 1) {
+					var _this = Game.ME.level;
 					var cx = this.cx;
 					var cy = this.cy + 1;
-					tmp = cx >= 0 && cx < 20 && cy >= 0 && cy < 10 ? Game.ME.level.tileMap.h[cx + cy * 20].isCollider == true : true;
+					tmp = cx >= 0 && cx < _this.cWid && cy >= 0 && cy < _this.cHei ? _this.tileMap.h[cx + cy * _this.cWid].isCollider == true : true;
 				} else {
 					tmp = false;
 				}
@@ -1792,9 +1760,10 @@ Entity.prototype = {
 				}
 				var tmp1;
 				if(this.yr < 0.3) {
+					var _this1 = Game.ME.level;
 					var cx1 = this.cx;
 					var cy1 = this.cy - 1;
-					tmp1 = cx1 >= 0 && cx1 < 20 && cy1 >= 0 && cy1 < 10 ? Game.ME.level.tileMap.h[cx1 + cy1 * 20].isCollider == true : true;
+					tmp1 = cx1 >= 0 && cx1 < _this1.cWid && cy1 >= 0 && cy1 < _this1.cHei ? _this1.tileMap.h[cx1 + cy1 * _this1.cWid].isCollider == true : true;
 				} else {
 					tmp1 = false;
 				}
@@ -1931,8 +1900,8 @@ var Game = function() {
 	this.scroller = new h2d_Layers();
 	this.root.addChildAt(this.scroller,Const.DP_BG);
 	this.scroller.set_filter(new h2d_filter_ColorMatrix());
-	this.camera = new Camera();
 	this.level = new Level();
+	this.camera = new Camera();
 	this.fx = new Fx();
 	this.hud = new ui_Hud();
 	this.packet = new Packet();
@@ -2488,7 +2457,7 @@ Input.prototype = {
 			} else {
 				tmp1 = false;
 			}
-			if(tmp1 && this.hero.cd.fastCheck.h.hasOwnProperty(33554432) == false) {
+			if(tmp1 && this.hero.cd.fastCheck.h.hasOwnProperty(33554432) == false && this.hero.cd.fastCheck.h.hasOwnProperty(37748736) == false) {
 				var _this = this.hero;
 				tmp = (_this.sx != 0 || _this.sy != 0) == false;
 			} else {
@@ -2499,7 +2468,7 @@ Input.prototype = {
 				this.hero.sy = 0;
 				this.readyHammering();
 				var _this = this.hero.cd;
-				var frames = 0.1 * this.hero.cd.baseFps;
+				var frames = 999999 * this.hero.cd.baseFps;
 				var allowLower = true;
 				var onComplete = null;
 				if(allowLower == null) {
@@ -2671,50 +2640,20 @@ Lang.init = function(lid) {
 };
 var Level = function() {
 	this.invalidated = true;
+	this.cHei = 10;
+	this.cWid = 10;
 	dn_Process.call(this,Game.ME);
 	this.createRootInLayers(Game.ME.scroller,Const.DP_BG);
-	var i = 100;
 	this.tileMap = new haxe_ds_IntMap();
-	var _g = 0;
-	while(_g < 20) {
-		var cx = _g++;
-		var this1 = this.tileMap;
-		var value = new entity_Tile(cx,0,i++);
-		this1.h[cx] = value;
-		var this2 = this.tileMap;
-		var value1 = new entity_Tile(cx,1,i++);
-		this2.h[cx + 20] = value1;
-		var this3 = this.tileMap;
-		var value2 = new entity_Tile(cx,2,i++);
-		this3.h[cx + 40] = value2;
-		var this4 = this.tileMap;
-		var value3 = new entity_Tile(cx,3,i++);
-		this4.h[cx + 60] = value3;
-		var this5 = this.tileMap;
-		var value4 = new entity_Tile(cx,4,i++);
-		this5.h[cx + 80] = value4;
-		var this6 = this.tileMap;
-		var value5 = new entity_Tile(cx,5,i++);
-		this6.h[cx + 100] = value5;
-		var this7 = this.tileMap;
-		var value6 = new entity_Tile(cx,6,i++);
-		this7.h[cx + 120] = value6;
-		var this8 = this.tileMap;
-		var value7 = new entity_Tile(cx,7,i++);
-		this8.h[cx + 140] = value7;
-		var this9 = this.tileMap;
-		var value8 = new entity_Tile(cx,8,i++);
-		this9.h[cx + 160] = value8;
-		var this10 = this.tileMap;
-		var value9 = new entity_Tile(cx,9,i++);
-		this10.h[cx + 180] = value9;
-	}
 };
 $hxClasses["Level"] = Level;
 Level.__name__ = "Level";
 Level.__super__ = dn_Process;
 Level.prototype = $extend(dn_Process.prototype,{
-	render: function() {
+	addTile: function(tile) {
+		this.tileMap.h[tile.cx + tile.cy * this.cWid] = tile;
+	}
+	,render: function() {
 		this.root.removeChildren();
 	}
 	,postUpdate: function() {
@@ -2779,7 +2718,7 @@ var Packet = function() {
 	Packet.ME = this;
 	var v = $bind(this,this.OnEnterSession);
 	this.PacketHandler.h[5001] = v;
-	var v = $bind(this,this.OnBroadcastSyncState);
+	var v = $bind(this,this.OnSyncState);
 	this.PacketHandler.h[5002] = v;
 	var v = $bind(this,this.OnDestroyedEntity);
 	this.PacketHandler.h[5003] = v;
@@ -2787,127 +2726,172 @@ var Packet = function() {
 	this.PacketHandler.h[5004] = v;
 	var v = $bind(this,this.OnHammering);
 	this.PacketHandler.h[5005] = v;
+	var v = $bind(this,this.OnCrushTile);
+	this.PacketHandler.h[5006] = v;
+	var v = $bind(this,this.OnRecoverTile);
+	this.PacketHandler.h[5007] = v;
 };
 $hxClasses["Packet"] = Packet;
 Packet.__name__ = "Packet";
 Packet.prototype = {
-	OnRespHandler: function(message) {
-		var packetType = message.getUInt16(0);
+	readEntitySyncState: function(packetStream) {
+		var entityType = packetStream.getUInt16();
+		var id = packetStream.getInt32();
+		var sx = packetStream.getInt32();
+		var sy = packetStream.getInt32();
+		var cx = packetStream.getInt32();
+		var cy = packetStream.getInt32();
+		var xr = packetStream.getFloat();
+		var yr = packetStream.getFloat();
+		var dx = packetStream.getFloat();
+		var dy = packetStream.getFloat();
+		var bdx = packetStream.getFloat();
+		var bdy = packetStream.getFloat();
+		var altitude = packetStream.getFloat();
+		var dalt = packetStream.getFloat();
+		var proxy = entity_Proxy.FindProxy(id);
+		if(proxy == null) {
+			switch(entityType) {
+			case 1:
+				proxy = new entity_Hero(0,0,id);
+				break;
+			case 2:
+				proxy = new entity_Ball(0,0,id);
+				break;
+			case 3:
+				var tile = new entity_Tile(cx,cy,id);
+				proxy = tile;
+				Game.ME.level.addTile(tile);
+				break;
+			default:
+			}
+		}
+		proxy.sx = sx;
+		proxy.sy = sy;
+		proxy.cx = cx;
+		proxy.cy = cy;
+		proxy.xr = xr;
+		proxy.yr = yr;
+		proxy.dx = dx;
+		proxy.dy = dy;
+		proxy.bdx = bdx;
+		proxy.bdy = bdy;
+		proxy.altitude = altitude;
+		proxy.dalt = dalt;
+		return proxy;
+	}
+	,OnRespHandler: function(message) {
+		var packetStream = new PacketStream(message);
+		var packetType = packetStream.getUInt16();
 		if(this.PacketHandler.h.hasOwnProperty(packetType) == true) {
 			var handler = this.PacketHandler.h[packetType];
-			handler(message);
+			handler(packetStream);
 		}
 	}
-	,OnEnterSession: function(message) {
-		var pos = 2;
-		var myId = message.getInt32(pos);
+	,OnEnterSession: function(packetStream) {
+		var myId = packetStream.getInt32();
 		Game.ME.input.hero = new entity_Hero(0,0,myId);
-		haxe_Log.trace("My ID: " + myId,{ fileName : "src/Packet.hx", lineNumber : 48, className : "Packet", methodName : "OnEnterSession"});
+		var width = packetStream.getInt32();
+		var height = packetStream.getInt32();
+		Game.ME.level.cWid = width;
+		Game.ME.level.cHei = height;
+		var tileCount = packetStream.getInt32();
+		var _g = 0;
+		var _g1 = tileCount;
+		while(_g < _g1) {
+			var i = _g++;
+			var tileType = packetStream.getUInt16();
+			var id = packetStream.getInt32();
+			var cx = packetStream.getInt32();
+			var cy = packetStream.getInt32();
+			var tile = new entity_Tile(cx,cy,id);
+			Game.ME.level.addTile(tile);
+		}
+		var entityCount = packetStream.getInt32();
+		var _g = 0;
+		var _g1 = entityCount;
+		while(_g < _g1) {
+			var i = _g++;
+			this.readEntitySyncState(packetStream);
+		}
 	}
-	,OnDestroyedEntity: function(message) {
-		var pos = 2;
-		var destroyedEntityId = message.getInt32(pos);
+	,OnDestroyedEntity: function(packetStream) {
+		var destroyedEntityId = packetStream.getInt32();
 		var proxy = entity_Proxy.FindProxy(destroyedEntityId);
 		if(!proxy.destroyed) {
 			proxy.destroyed = true;
 			Entity.GC.push(proxy);
 		}
-		haxe_Log.trace("Destroy Entity ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 57, className : "Packet", methodName : "OnDestroyedEntity"});
+		haxe_Log.trace("LeaveUser - ID: " + destroyedEntityId,{ fileName : "src/Packet.hx", lineNumber : 143, className : "Packet", methodName : "OnDestroyedEntity"});
 	}
-	,OnReadyHammering: function(message) {
-		var pos = 2;
-		var entityId = message.getInt32(pos);
-		pos += 4;
-		var dirX = message.getInt32(pos);
-		pos += 4;
-		var dirY = message.getInt32(pos);
-		pos += 4;
-		var proxy = entity_Proxy.FindProxy(entityId);
-		var hero = js_Boot.__cast(proxy , entity_Hero);
-		if(hero == null) {
-			return;
-		}
-		hero.readyHammering(dirX,dirY);
+	,OnReadyHammering: function(packetStream) {
+		var dirX = packetStream.getInt32();
+		var dirY = packetStream.getInt32();
+		var proxy = this.readEntitySyncState(packetStream);
+		(js_Boot.__cast(proxy , entity_Hero)).readyHammering(dirX,dirY);
 	}
-	,OnHammering: function(message) {
-		var pos = 2;
-		var entityId = message.getInt32(pos);
-		pos += 4;
-		var dirX = message.getInt32(pos);
-		pos += 4;
-		var dirY = message.getInt32(pos);
-		pos += 4;
-		var proxy = entity_Proxy.FindProxy(entityId);
-		var hero = js_Boot.__cast(proxy , entity_Hero);
-		if(hero == null) {
-			return;
-		}
-		hero.hammering(dirX,dirY);
+	,OnHammering: function(packetStream) {
+		var dirX = packetStream.getInt32();
+		var dirY = packetStream.getInt32();
+		var proxy = this.readEntitySyncState(packetStream);
+		(js_Boot.__cast(proxy , entity_Hero)).hammering(dirX,dirY);
 	}
-	,OnBroadcastSyncState: function(message) {
-		var pos = 2;
-		var entityCount = message.getInt32(pos);
-		pos += 4;
+	,OnSyncState: function(packetStream) {
+		var entityCount = packetStream.getInt32();
 		var _g = 0;
 		var _g1 = entityCount;
 		while(_g < _g1) {
 			var i = _g++;
-			var entityType = message.b[pos];
-			++pos;
-			var id = message.getInt32(pos);
-			pos += 4;
-			var sx = message.getInt32(pos);
-			pos += 4;
-			var sy = message.getInt32(pos);
-			pos += 4;
-			var cx = message.getInt32(pos);
-			pos += 4;
-			var cy = message.getInt32(pos);
-			pos += 4;
-			var xr = message.getFloat(pos);
-			pos += 4;
-			var yr = message.getFloat(pos);
-			pos += 4;
-			var dx = message.getFloat(pos);
-			pos += 4;
-			var dy = message.getFloat(pos);
-			pos += 4;
-			var bdx = message.getFloat(pos);
-			pos += 4;
-			var bdy = message.getFloat(pos);
-			pos += 4;
-			var altitude = message.getFloat(pos);
-			pos += 4;
-			var dalt = message.getFloat(pos);
-			pos += 4;
-			var proxy = entity_Proxy.FindProxy(id);
-			if(proxy == null) {
-				switch(entityType) {
-				case 1:
-					proxy = new entity_Hero(cx,cy,id);
-					break;
-				case 2:
-					proxy = new entity_Ball(cx,cy,id);
-					break;
-				default:
-				}
-				haxe_Log.trace("New ID : " + entityType,{ fileName : "src/Packet.hx", lineNumber : 137, className : "Packet", methodName : "OnBroadcastSyncState"});
-			}
-			proxy.sx = sx;
-			proxy.sy = sy;
-			proxy.cx = cx;
-			proxy.cy = cy;
-			proxy.xr = xr;
-			proxy.yr = yr;
-			proxy.dx = dx;
-			proxy.dy = dy;
-			proxy.bdx = bdx;
-			proxy.bdy = bdy;
-			proxy.altitude = altitude;
-			proxy.dalt = dalt;
+			this.readEntitySyncState(packetStream);
+		}
+	}
+	,OnCrushTile: function(packetStream) {
+		var heroId = packetStream.getInt32();
+		var cx = packetStream.getInt32();
+		var cy = packetStream.getInt32();
+		var hero = js_Boot.__cast(entity_Proxy.FindProxy(heroId) , entity_Hero);
+		var _this = Game.ME.level;
+		var tile = (cx >= 0 && cx < _this.cWid && cy >= 0 && cy < _this.cHei) == true ? _this.tileMap.h[cx + cy * _this.cWid] : null;
+		if(tile != null) {
+			tile.crush(hero);
+		}
+	}
+	,OnRecoverTile: function(packetStream) {
+		var cx = packetStream.getInt32();
+		var cy = packetStream.getInt32();
+		var _this = Game.ME.level;
+		var tile = (cx >= 0 && cx < _this.cWid && cy >= 0 && cy < _this.cHei) == true ? _this.tileMap.h[cx + cy * _this.cWid] : null;
+		if(tile != null) {
+			tile.recover();
 		}
 	}
 	,__class__: Packet
+};
+var PacketStream = function(message) {
+	this._pos = 0;
+	this._bytes = null;
+	this._bytes = message;
+	this._pos = 0;
+};
+$hxClasses["PacketStream"] = PacketStream;
+PacketStream.__name__ = "PacketStream";
+PacketStream.prototype = {
+	getInt32: function() {
+		var pos = this._pos;
+		this._pos += 4;
+		return this._bytes.getInt32(pos);
+	}
+	,getUInt16: function() {
+		var pos = this._pos;
+		this._pos += 2;
+		return this._bytes.getUInt16(pos);
+	}
+	,getFloat: function() {
+		var pos = this._pos;
+		this._pos += 4;
+		return this._bytes.getFloat(pos);
+	}
+	,__class__: PacketStream
 };
 var Reflect = function() { };
 $hxClasses["Reflect"] = Reflect;
@@ -7958,21 +7942,25 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 			var i = _g++;
 			var tile = null;
 			if(sx == 1) {
+				var _this = Game.ME.level;
 				var cx = this.cx + i;
 				var cy = this.cy;
-				tile = (cx >= 0 && cx < 20 && cy >= 0 && cy < 10) == true ? Game.ME.level.tileMap.h[cx + cy * 20] : null;
+				tile = (cx >= 0 && cx < _this.cWid && cy >= 0 && cy < _this.cHei) == true ? _this.tileMap.h[cx + cy * _this.cWid] : null;
 			} else if(sx == -1) {
+				var _this1 = Game.ME.level;
 				var cx1 = this.cx - i;
 				var cy1 = this.cy;
-				tile = (cx1 >= 0 && cx1 < 20 && cy1 >= 0 && cy1 < 10) == true ? Game.ME.level.tileMap.h[cx1 + cy1 * 20] : null;
+				tile = (cx1 >= 0 && cx1 < _this1.cWid && cy1 >= 0 && cy1 < _this1.cHei) == true ? _this1.tileMap.h[cx1 + cy1 * _this1.cWid] : null;
 			} else if(sy == 1) {
+				var _this2 = Game.ME.level;
 				var cx2 = this.cx;
 				var cy2 = this.cy + i;
-				tile = (cx2 >= 0 && cx2 < 20 && cy2 >= 0 && cy2 < 10) == true ? Game.ME.level.tileMap.h[cx2 + cy2 * 20] : null;
+				tile = (cx2 >= 0 && cx2 < _this2.cWid && cy2 >= 0 && cy2 < _this2.cHei) == true ? _this2.tileMap.h[cx2 + cy2 * _this2.cWid] : null;
 			} else if(sy == -1) {
+				var _this3 = Game.ME.level;
 				var cx3 = this.cx;
 				var cy3 = this.cy - i;
-				tile = (cx3 >= 0 && cx3 < 20 && cy3 >= 0 && cy3 < 10) == true ? Game.ME.level.tileMap.h[cx3 + cy3 * 20] : null;
+				tile = (cx3 >= 0 && cx3 < _this3.cWid && cy3 >= 0 && cy3 < _this3.cHei) == true ? _this3.tileMap.h[cx3 + cy3 * _this3.cWid] : null;
 			}
 			if(tile != null) {
 				tile.onTile(this);
@@ -7980,31 +7968,6 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 		}
 	}
 	,hammering: function(sx,sy) {
-		var _g = 1;
-		while(_g < 5) {
-			var i = _g++;
-			var tile = null;
-			if(sx == 1) {
-				var cx = this.cx + i;
-				var cy = this.cy;
-				tile = (cx >= 0 && cx < 20 && cy >= 0 && cy < 10) == true ? Game.ME.level.tileMap.h[cx + cy * 20] : null;
-			} else if(sx == -1) {
-				var cx1 = this.cx - i;
-				var cy1 = this.cy;
-				tile = (cx1 >= 0 && cx1 < 20 && cy1 >= 0 && cy1 < 10) == true ? Game.ME.level.tileMap.h[cx1 + cy1 * 20] : null;
-			} else if(sy == 1) {
-				var cx2 = this.cx;
-				var cy2 = this.cy + i;
-				tile = (cx2 >= 0 && cx2 < 20 && cy2 >= 0 && cy2 < 10) == true ? Game.ME.level.tileMap.h[cx2 + cy2 * 20] : null;
-			} else if(sy == -1) {
-				var cx3 = this.cx;
-				var cy3 = this.cy - i;
-				tile = (cx3 >= 0 && cx3 < 20 && cy3 >= 0 && cy3 < 10) == true ? Game.ME.level.tileMap.h[cx3 + cy3 * 20] : null;
-			}
-			if(tile != null) {
-				tile.crush(this);
-			}
-		}
 	}
 	,__class__: entity_Hero
 });
@@ -8081,11 +8044,10 @@ entity_Tile.prototype = $extend(entity_Proxy.prototype,{
 		}
 	}
 	,crush: function(e) {
-		var _gthis = this;
 		this.entityVisible = false;
-		this.chargeAction("crush",5,function() {
-			_gthis.entityVisible = true;
-		});
+	}
+	,recover: function() {
+		this.entityVisible = true;
 	}
 	,__class__: entity_Tile
 });
