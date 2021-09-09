@@ -1606,13 +1606,12 @@ Entity.prototype = {
 			var fh = this.shadow;
 			fh.posChanged = true;
 			fh.y += 1;
-		}
-		if(this.shadow != null) {
 			var _this = this.shadow;
 			_this.posChanged = true;
 			_this.x = this.spr.x;
 			_this.posChanged = true;
 			_this.y = (this.cy + this.yr) * 16 - 2;
+			this.shadow.set_visible(this.entityVisible);
 		}
 		if(this.debugLabel != null) {
 			var _this = this.debugLabel;
@@ -2176,7 +2175,7 @@ $hxClasses["Input"] = Input;
 Input.__name__ = "Input";
 Input.prototype = {
 	updateMovement: function() {
-		if(this.hero.cd.fastCheck.h.hasOwnProperty(29360128) == true) {
+		if(this.hero.cd.fastCheck.h.hasOwnProperty(20971520) == true) {
 			return;
 		}
 		var sx = 0;
@@ -2422,7 +2421,7 @@ Input.prototype = {
 		}
 	}
 	,updateAction: function() {
-		if(this.hero.cd.fastCheck.h.hasOwnProperty(29360128) == true) {
+		if(this.hero.cd.fastCheck.h.hasOwnProperty(20971520) == true) {
 			return;
 		}
 		var _this = this.hero;
@@ -3211,7 +3210,7 @@ Type.enumParameters = function(e) {
 	}
 };
 var Websocket = function() {
-	this.ws = haxe_net_WebSocket.create("ws://13.124.120.184:8000/echo");
+	this.ws = haxe_net_WebSocket.create("ws://127.0.0.1:8000/echo");
 	this.ws.onopen = $bind(this,this.onOpen);
 	this.ws.onmessageBytes = $bind(this,this.onMessage);
 };
@@ -7871,7 +7870,11 @@ var entity_Hero = function(x,y,id) {
 		}
 	}
 	_this._animManager.registerStateAnim("heroWalk",2,0.25,function() {
-		return _gthis.cd.fastCheck.h.hasOwnProperty(16777216);
+		if(_gthis.cd.fastCheck.h.hasOwnProperty(16777216)) {
+			return _gthis.cd.fastCheck.h.hasOwnProperty(20971520) == false;
+		} else {
+			return false;
+		}
 	});
 	var _this = this.spr;
 	if(_this._animManager == null) {
@@ -7881,7 +7884,11 @@ var entity_Hero = function(x,y,id) {
 		}
 	}
 	_this._animManager.registerStateAnim("heroTalk",1,0.4,function() {
-		return _gthis.cd.fastCheck.h.hasOwnProperty(20971520);
+		if(_gthis.cd.fastCheck.h.hasOwnProperty(25165824)) {
+			return _gthis.cd.fastCheck.h.hasOwnProperty(20971520) == false;
+		} else {
+			return false;
+		}
 	});
 	var _this = this.spr;
 	if(_this._animManager == null) {
@@ -7899,10 +7906,10 @@ entity_Hero.__super__ = entity_Proxy;
 entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 	update: function() {
 		entity_Proxy.prototype.update.call(this);
-		var spd = this.cd.fastCheck.h.hasOwnProperty(25165824) ? 2 : 1;
+		var spd = this.cd.fastCheck.h.hasOwnProperty(29360128) ? 2 : 1;
 		var _this = Game.ME;
 		var spd1 = 0.03 * spd * (_this.utmod * _this.getComputedTimeMultiplier());
-		if(this.cd.fastCheck.h.hasOwnProperty(25165824)) {
+		if(this.cd.fastCheck.h.hasOwnProperty(29360128)) {
 			var _this = this.spr;
 			if(_this._animManager == null) {
 				_this._animManager = new dn_heaps_slib_AnimManager(_this);
@@ -7961,9 +7968,15 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 				}
 			}
 		}
+		if(this.cd.fastCheck.h.hasOwnProperty(20971520) == true) {
+			this.sx = 0;
+			this.sy = 1;
+			spd1 = 5;
+			this.hasColl = false;
+		}
 	}
 	,fall: function() {
-		this.entityVisible = false;
+		Game.ME.scroller.addChildAt(this.spr,Const.DP_BG);
 		var _this = this.cd;
 		var frames = 999999 * this.cd.baseFps;
 		var allowLower = true;
@@ -7972,7 +7985,7 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 			allowLower = true;
 		}
 		frames = Math.floor(frames * 1000) / 1000;
-		var cur = _this._getCdObject(29360128);
+		var cur = _this._getCdObject(20971520);
 		if(!(cur != null && frames < cur.frames && !allowLower)) {
 			if(frames <= 0) {
 				if(cur != null) {
@@ -7982,21 +7995,21 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 					_this.fastCheck.remove(cur.k);
 				}
 			} else {
-				_this.fastCheck.h[29360128] = true;
+				_this.fastCheck.h[20971520] = true;
 				if(cur != null) {
 					cur.frames = frames;
 					cur.initial = frames;
 				} else {
-					_this.cdList.push(new dn__$Cooldown_CdInst(29360128,frames));
+					_this.cdList.push(new dn__$Cooldown_CdInst(20971520,frames));
 				}
 			}
 			if(onComplete != null) {
 				if(frames <= 0) {
 					onComplete();
 				} else {
-					var cd = _this._getCdObject(29360128);
+					var cd = _this._getCdObject(20971520);
 					if(cd == null) {
-						throw haxe_Exception.thrown("cannot bind onComplete(" + 29360128 + "): cooldown " + 29360128 + " isn't running");
+						throw haxe_Exception.thrown("cannot bind onComplete(" + 20971520 + "): cooldown " + 20971520 + " isn't running");
 					}
 					cd.cb = onComplete;
 				}
@@ -8010,7 +8023,7 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 		while(_g < _g1.length) {
 			var cd = _g1[_g];
 			++_g;
-			if(cd.k == 29360128) {
+			if(cd.k == 20971520) {
 				HxOverrides.remove(_this.cdList,cd);
 				cd.frames = 0;
 				cd.cb = null;
@@ -8018,7 +8031,7 @@ entity_Hero.prototype = $extend(entity_Proxy.prototype,{
 				break;
 			}
 		}
-		this.entityVisible = true;
+		Game.ME.scroller.addChildAt(this.spr,Const.DP_MAIN);
 	}
 	,readyHammering: function(sx,sy) {
 		var _g = 1;
@@ -51874,7 +51887,7 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
-dn_Cooldown.__meta__ = { obj : { indexes : ["flat","shaking","recentHit","rolling","walking","talking","dashing","falling","hammering","readyHammering","zsort","emitterLife","emitterTick","test","jump"]}};
+dn_Cooldown.__meta__ = { obj : { indexes : ["flat","shaking","recentHit","rolling","walking","falling","talking","dashing","hammering","readyHammering","zsort","emitterLife","emitterTick","test","jump"]}};
 dn_data_GetText.VERBOSE = false;
 dn_data_GetText.CONTEXT_DISAMB_SEP = "||@";
 dn_data_GetText.COMMENT_REG = new EReg("(\\|\\|\\?(.*?))($|\\|\\|)","i");
